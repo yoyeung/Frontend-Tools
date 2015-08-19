@@ -13,6 +13,12 @@ var merge = require('merge-stream');
 var data = require('gulp-data');
 var fs = require('fs');
 var browserSync = require('browser-sync');
+var uglify =require('gulp-uglify');
+var usemin = require('gulp-usemin');
+var minifyHtml = require('gulp-minify-html');
+var minifyCss = require('gulp-minify-css');
+var rev = require('gulp-rev');
+var path = require('path');
 
 var serverSetting = {
   host: 'localhost',
@@ -29,6 +35,12 @@ var langs=[];
 gulp.task('compile-lib',function(){
   gulp.src('./src/lib/**/*')
   .pipe(gulp.dest('./build/lib'));
+});
+
+// movie js
+gulp.task('compile-js',function(){
+  gulp.src('./src/js/**/*')
+  .pipe(gulp.dest('./build/js'));
 });
 // pre compile sass
 gulp.task('compile-sass',function(){
@@ -62,37 +74,57 @@ gulp.task('compile-sass',function(){
 //     // .pipe(connect.reload());
 // });
 
-gulp.task('compile-jade-by-lang',function(){
-  fs.readdir(data_src_path,function(err, files){
-    if(err){
-      return false;
-    }else{
-
-      for(var index in files){
-        if(fs.lstatSync(data_src_path+files[index]).isDirectory()){
-          langs.push(files[index]);
-        }
-      }
-      console.log("langs "+langs);
-      for(var index in langs){
-        gulp.src('./src/jade/**/*.jade')
-          // .pipe(data(function(file){
-          //   return require('./src/data/data.json');
-          // }))
+gulp.task('compile-jade-by-lang',['clear-tmp'],function(){
+  // fs.readdir(data_src_path,function(err, files){
+    // if(err){
+    //   return false;
+    // }else{
+    //   langs=[];
+    //   for(var index in files){
+    //     if(fs.lstatSync(data_src_path+files[index]).isDirectory()){
+    //       langs.push(files[index]);
+    //     }
+    //   }
+    //
+    //   for(var index in langs){
+        gulp.src(['./src/jade/**/*.jade','!./src/jade/layout/**/*.jade'])
+          .pipe(data(function(file){
+            var paths= file.path.split(path.sep);
+            var paths=paths[paths.length-2];
+            return require('./src/data/'+paths+'/data.json');
+          }))
           .pipe(jade(
             {
-              data: JSON.parse( fs.readFileSync('./src/data/'+langs[index]+'/data.json', { encoding: 'utf8' }) )
+              pretty: true
+              //data: JSON.parse( fs.readFileSync('./src/data/'+langs[index]+'/data.json', { encoding: 'utf8' }) )
             }
           ))
-          .pipe(gulp.dest('./build/'+langs[index]))
-      }
+          .pipe(gulp.dest('./build/'))
+      // }
       // connect.reload();
 
-    }
-  });
-
-
+  //   }
+  // });
 });
+// gulp.task('usemin', function () {
+//   return gulp.src('./.tmp/**/*.html')
+//       .pipe(usemin({
+//         css: ['concat'],
+//         js: [rev()],
+//         assetsDir:"./build"
+//       }))
+//       .pipe(gulp.dest('./build/'));
+// });
+// gulp.task('compile-html',['compile-jade-by-lang'], function () {
+//     var assets = useref.assets({searchPath:['build']});
+//
+//     return gulp.src('./tmp/**/*.html')
+//         .pipe(htmlreplace({
+//             'css': '../css/combined.css',
+//             'js': '../js/combined.js'
+//         }))
+//         .pipe(gulp.dest('./build/'));
+// });
 
 gulp.task('create-sprite',function(){
   var spriteData = gulp.src('./src/img/sprite/*.png').pipe(spritesmith({
@@ -151,6 +183,12 @@ gulp.task('build-img',function(){
 
 });
 
+gulp.task('build-js',function(){
+  gulp.src('./build/js/**/*.js')
+  .pipe(uglify())
+  .pipe(gulp.dest('./package/js'))
+});
+
 gulp.task('sass:watch', function () {
   gulp.watch('./src/sass/**/*.scss', ['compile-sass']);
 });
@@ -191,7 +229,10 @@ gulp.task('webserver', function () {
       }
    });
 });
-
+gulp.task('clear-tmp',function(){
+  return gulp.src('./.tmp', {read: false})
+    .pipe(clean());
+});
 gulp.task('clear-compile',function(){
   return gulp.src('./build', {read: false})
     .pipe(clean());
@@ -202,11 +243,11 @@ gulp.task('clear-build',function(){
     .pipe(clean());
 });
 
-gulp.task('compile',['compile-jade-by-lang','compile-lib','move-img','compile-sass']);
+gulp.task('compile',['compile-lib','move-img','compile-sass','compile-js','compile-jade-by-lang']);
 
 gulp.task('watch',['compile','sass:watch','jade:watch','lib:watch','sprite:watch','data:watch']);
 
 gulp.task('server',['compile','webserver','watch']);
 
-gulp.task('clear-all',['clear-build','clear-compile']);
-gulp.task('build',['build-img','build-jade','build-lib','build-sass']);
+gulp.task('clear',['clear-build','clear-compile','clear-tmp']);
+gulp.task('build',['build-img','build-jade','build-lib','build-sass','build-js']);
