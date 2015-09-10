@@ -152,7 +152,7 @@ gulp.task('build-jade',['compile-jade-by-lang'], function() {
   return gulp.src('./build/**/*.html')
     .pipe(usemin({
       css: [ minifyCss(),rev() ],
-      html: [ minifyHtml({ empty: true }) ],
+      html: [ minifyHtml({ empty: true ,conditionals:true}) ],
       js: [ uglify(), rev() ]
     }))
     .pipe(gulp.dest('./package/'));
