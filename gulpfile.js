@@ -93,12 +93,12 @@ gulp.task('create-sprite',function(){
    imgName: 'sprite.png',
    cssName: '_sprite.scss',
    cssRetinaSpritesheetName: '_sprite@2x.scss',
-   //retinaSrcFilter: './src/img/sprite/*2x.png',
-   //retinaImgName: 'sprite@2x.png',
+   retinaSrcFilter: './src/img/sprite/*2x.png',
+   retinaImgName: 'sprite@2x.png',
    padding: 10,
-   imgPath:'../img/sprite.png',
-   retinaImgPath:'../img/sprite@2x.png'
-  //  cssTemplate: 'handlebarsStr.css.handlebars'
+   imgPath:'sprite.png',
+   retinaImgPath:'sprite@2x.png'//,
+   //cssTemplate: 'handlebarsStr.css.handlebars'
  }));
  var imgStream = spriteData.img
     .pipe(gulp.dest('./src/img/'));
@@ -218,7 +218,8 @@ gulp.task('webserver', function () {
    browserSync.init(files, {
       server: {
          baseDir: './build',
-         directory: false
+         directory: false,
+         index:"cn/index.html"
       }
    });
 });

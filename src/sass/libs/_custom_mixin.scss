@@ -1,5 +1,5 @@
 @import 'color';
-@import 'variable';
+@import '../layout/variable';
 
 // Color  Function
 @function color($group, $shade:normal, $transparency:1){
