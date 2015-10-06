@@ -1327,3 +1327,11 @@ pre {
 @import "bootstrap/utilities";
 @import "bootstrap/responsive-utilities";
 */
+html, body {
+  width: 100%;
+  height: 100%; }
+
+.fullscreen {
+  background-color: #ccc;
+  width: 100%;
+  height: 100%; }

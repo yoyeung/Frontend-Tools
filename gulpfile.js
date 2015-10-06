@@ -218,8 +218,7 @@ gulp.task('webserver', function () {
    browserSync.init(files, {
       server: {
          baseDir: './build',
-         directory: false,
-         index:"cn/index.html"
+         directory: false
       }
    });
 });
